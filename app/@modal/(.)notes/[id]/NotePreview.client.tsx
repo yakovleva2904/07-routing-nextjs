@@ -1,13 +1,35 @@
-'use client';
+"use client";
 
-import type { Note } from '@/types/note';
-import css from './NotePreview.module.css';
+import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 
-type NotePreviewProps = {
-  note: Note;
+import { fetchNoteById } from "@/lib/api";
+import css from "./NotePreview.module.css";
+
+type Props = {
+  id: string;
 };
 
-export default function NotePreview({ note }: NotePreviewProps) {
+export default function NotePreview({ id }: Props) {
+  const router = useRouter();
+
+  const {
+    data: note,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["note", id],
+    queryFn: () => fetchNoteById(id),
+  });
+
+  if (isLoading) {
+    return <p>Loading, please wait...</p>;
+  }
+
+  if (isError || !note) {
+    return <p>Something went wrong.</p>;
+  }
+
   return (
     <div className={css.container}>
       <div className={css.item}>
@@ -18,9 +40,15 @@ export default function NotePreview({ note }: NotePreviewProps) {
 
         <p className={css.content}>{note.content}</p>
 
-        <p className={css.date}>
-          {new Date(note.createdAt).toLocaleDateString()}
-        </p>
+        <p className={css.date}>{note.createdAt}</p>
+
+        <button
+          type="button"
+          className={css.backBtn}
+          onClick={() => router.back()}
+        >
+          Back
+        </button>
       </div>
     </div>
   );
