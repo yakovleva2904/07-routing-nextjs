@@ -1,14 +1,13 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 import type { Note } from '@/types/note';
-
 import { fetchNoteById } from '@/lib/api';
 
 import Modal from '@/components/Modal/Modal';
-import NotePreview from '@/components/NotePreview/NotePreview';
+import NotePreview from './NotePreview.client';
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -16,15 +15,12 @@ type Props = {
 
 export default function NoteModalPage({ params }: Props) {
   const router = useRouter();
-
   const [note, setNote] = useState<Note | null>(null);
 
   useEffect(() => {
     async function loadNote() {
       const { id } = await params;
-
       const data = await fetchNoteById(id);
-
       setNote(data);
     }
 
@@ -32,7 +28,7 @@ export default function NoteModalPage({ params }: Props) {
   }, [params]);
 
   if (!note) {
-    return null;
+    return <p>Loading...</p>;
   }
 
   return (
