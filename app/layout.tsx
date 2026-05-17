@@ -24,12 +24,10 @@ export const metadata: Metadata = {
 
 type RootLayoutProps = Readonly<{
   children: React.ReactNode;
-  modal: React.ReactNode;
 }>;
 
 export default function RootLayout({
   children,
-  modal,
 }: RootLayoutProps) {
   return (
     <html lang="en">
@@ -38,8 +36,6 @@ export default function RootLayout({
           <Header />
 
           <main>{children}</main>
-
-          {modal}
 
           <Footer />
         </TanStackProvider>
