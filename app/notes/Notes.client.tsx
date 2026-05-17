@@ -1,71 +1,86 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import css from './Notes.module.css'
+import { useState } from 'react';
 
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import css from './Notes.module.css';
 
-import { useDebouncedCallback } from 'use-debounce'
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { useDebouncedCallback } from 'use-debounce';
+
 import { fetchNotes } from '@/lib/api';
+
 import SearchBox from '@/components/SearchBox/SearchBox';
 import Pagination from '@/components/Pagination/Pagination';
 import NoteList from '@/components/NoteList/NoteList';
 import Modal from '@/components/Modal/Modal';
 import NoteForm from '@/components/NoteForm/NoteForm';
 
-function Notes() {
-  const [page, setPage] = useState(1);
-  const [showModal, setShowModal] = useState<boolean>(false);
+type Props = {
+  tag?: string;
+};
 
-  const [inputValue, setInputValue] = useState(''); 
+export default function NotesClient({ tag }: Props) {
+  const [page, setPage] = useState(1);
+
+  const [showModal, setShowModal] = useState(false);
+
+  const [inputValue, setInputValue] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
   const debouncedSearch = useDebouncedCallback((value: string) => {
     setSearchQuery(value);
-    setPage(1); // 🔥 reset сторінки
+    setPage(1);
   }, 300);
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['notes', page, searchQuery],
-    queryFn: () => fetchNotes(
-      searchQuery,
-      page
-    ),
-    placeholderData: keepPreviousData
+    queryKey: ['notes', page, searchQuery, tag],
+
+    queryFn: () => fetchNotes(searchQuery, page, tag),
+
+    placeholderData: keepPreviousData,
   });
 
   if (isLoading) return <p>Loading...</p>;
-  if (isError) return <p>Error</p>;
+
+  if (isError || !data) return <p>Error loading notes.</p>;
 
   return (
-  <div className={css.app}>
-    <header className={css.toolbar}>
-    <SearchBox
-      searchQuery={inputValue}
-      onChange={(value: string) => {
-        setInputValue(value);
-        debouncedSearch(value);
-      }}
-    />
+    <div className={css.app}>
+      <header className={css.toolbar}>
+        <SearchBox
+          searchQuery={inputValue}
+          onChange={(value: string) => {
+            setInputValue(value);
+            debouncedSearch(value);
+          }}
+        />
 
-      {data && data?.totalPages > 1 && (
-        <Pagination totalPages={data?.totalPages} currentPage={page} onPageChange={setPage} />
+        {data.totalPages > 1 && (
+          <Pagination
+            totalPages={data.totalPages}
+            currentPage={page}
+            onPageChange={setPage}
+          />
+        )}
+
+        <button
+          className={css.button}
+          type="button"
+          onClick={() => setShowModal(true)}
+        >
+          Create note +
+        </button>
+      </header>
+
+      {data.notes.length > 0 && (
+        <NoteList notes={data.notes} />
       )}
-      <button className={css.button} onClick={() => setShowModal(true)}>Create note +</button>
-    </header>
 
-    {data?.notes.length !== 0 && (
-      <NoteList notes={data?.notes || []} />
-    )}
-
-    {showModal && (
-      <Modal onClose={() => setShowModal(false)}>
-        <NoteForm onClose={() => setShowModal(false)} />
-      </Modal>
-    )}
-  </div>
-
-  )
+      {showModal && (
+        <Modal onClose={() => setShowModal(false)}>
+          <NoteForm onClose={() => setShowModal(false)} />
+        </Modal>
+      )}
+    </div>
+  );
 }
-
-export default Notes;

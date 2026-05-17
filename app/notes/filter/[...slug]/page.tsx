@@ -15,16 +15,13 @@ type Props = {
 export default async function NotesFilterPage({ params }: Props) {
   const { slug } = await params;
 
-  const selectedTag =
-    slug?.[0] === 'all' ? undefined : slug?.[0];
+  const selectedTag = slug?.[0] === 'all' ? undefined : slug?.[0];
 
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery({
     queryKey: ['notes', '', 1, selectedTag],
-
-    queryFn: () =>
-      fetchNotes('', 1, selectedTag),
+    queryFn: () => fetchNotes('', 1, selectedTag),
   });
 
   return (
