@@ -8,12 +8,13 @@ interface fullResp {
     totalPages: number
 }
 
-export const fetchNotes = async (search: string, page: number) => {
+export const fetchNotes = async (search: string, page: number, tag?: string): Promise<fullResp> => {
     const response = await axios.get<fullResp>("https://notehub-public.goit.study/api/notes", {
         params: {
             search,
             perPage: 12,
-            page
+        page,
+            ...(tag ? {tag} : {}),
         },
         headers: {
             Authorization: `Bearer ${myKey}`
