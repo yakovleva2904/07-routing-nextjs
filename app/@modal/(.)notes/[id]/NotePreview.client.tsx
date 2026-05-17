@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 
+import Modal from "@/components/Modal/Modal";
+
 import { fetchNoteById } from "@/lib/api";
 import css from "./NotePreview.module.css";
 
@@ -20,6 +22,7 @@ export default function NotePreview({ id }: Props) {
   } = useQuery({
     queryKey: ["note", id],
     queryFn: () => fetchNoteById(id),
+    refetchOnMount: false,
   });
 
   if (isLoading) {
@@ -31,6 +34,7 @@ export default function NotePreview({ id }: Props) {
   }
 
   return (
+  <Modal onClose={() => router.back()}>
     <div className={css.container}>
       <div className={css.item}>
         <div className={css.header}>
@@ -51,5 +55,6 @@ export default function NotePreview({ id }: Props) {
         </button>
       </div>
     </div>
-  );
+  </Modal>
+);
 }

@@ -23,10 +23,10 @@ export default async function NoteModalPage({ params }: Props) {
   });
 
   return (
-    <Modal onClose={() => {}}>
+    
       <HydrationBoundary state={dehydrate(queryClient)}>
         <NotePreview id={id} />
       </HydrationBoundary>
-    </Modal>
+    
   );
 }
